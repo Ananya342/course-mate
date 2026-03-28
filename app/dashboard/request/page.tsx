@@ -33,10 +33,10 @@ export default function AddStudyRequestPage() {
     .filter((c) => user.courses.includes(c.id))
     .map((c) => ({ value: c.id, label: `${c.code} — ${c.name}` }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!courseId) return;
-    addStudyRequest({
+    await addStudyRequest({
       userId: user.id,
       courseId,
       skillLevel,

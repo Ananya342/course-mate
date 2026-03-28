@@ -237,6 +237,7 @@ export const MOCK_QA_POSTS: QAPost[] = [
     instructorAnswered: true,
     endorsedByInstructor: true,
     isResolved: true,
+    tags: ["lecture", "big-o", "recursion"],
     comments: [
       { id: "c1", postId: "qa1", authorId: "me", authorName: "Alex Chen", body: "It's because each call branches into two more calls, so the call tree doubles at each level.", createdAt: new Date(Date.now() - 172000000).toISOString() },
       { id: "c-instr", postId: "qa1", authorId: "instructor", authorName: "Prof. Smith", body: "Great question. I've endorsed Alex's answer—that's the right intuition. Formally we solve the recurrence T(n) = T(n-1) + T(n-2) + O(1).", createdAt: new Date(Date.now() - 171500000).toISOString(), isInstructor: true },
@@ -251,6 +252,7 @@ export const MOCK_QA_POSTS: QAPost[] = [
     authorName: "Jordan Lee",
     createdAt: new Date(Date.now() - 86400000).toISOString(),
     upvotes: 5,
+    tags: ["logistics", "office-hours"],
     comments: [],
   },
   {
@@ -262,6 +264,7 @@ export const MOCK_QA_POSTS: QAPost[] = [
     authorName: "Alex Chen",
     createdAt: new Date(Date.now() - 43200000).toISOString(),
     upvotes: 8,
+    tags: ["project", "data-structures", "exam-prep"],
     comments: [
       { id: "c2", postId: "qa3", authorId: "u5", authorName: "Riley Davis", body: "Hash table for O(1) average if you don't need ordering; BST if you need range queries or sorted order.", createdAt: new Date(Date.now() - 36000000).toISOString() },
       { id: "c2f", postId: "qa3", authorId: "me", authorName: "Alex Chen", body: "Follow-up: what about memory? I've heard hash tables can have higher overhead.", createdAt: new Date(Date.now() - 35000000).toISOString(), isFollowUp: true },
@@ -277,6 +280,7 @@ export const MOCK_QA_POSTS: QAPost[] = [
     createdAt: new Date(Date.now() - 28800000).toISOString(),
     upvotes: 15,
     isAnonymous: true,
+    tags: ["homework", "c", "pointers"],
     comments: [
       { id: "c3", postId: "qa4", authorId: "u2", authorName: "Sam Rivera", body: "& gives you the address of a variable, * dereferences (gets the value at an address). So int* p = &x; means p holds the address of x.", createdAt: new Date(Date.now() - 28000000).toISOString() },
     ],

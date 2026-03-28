@@ -19,9 +19,9 @@ function DashboardContent() {
   const [profileMatch, setProfileMatch] = useState<Match | null>(null);
   const showOnboarding = searchParams.get("onboarding") === "1";
 
-  const handleStartChat = (match: Match) => {
+  const handleStartChat = async (match: Match) => {
     const course = MOCK_COURSES.find((c) => c.id === match.courseId);
-    const groupId = createChatGroup(
+    const groupId = await createChatGroup(
       `${course?.code ?? match.courseId} - Study Group`,
       match.courseId,
       [user.id, match.user.id]
@@ -30,8 +30,8 @@ function DashboardContent() {
     router.push(`/dashboard/chat?group=${groupId}`);
   };
 
-  const handleStartDmFromProfile = (match: Match) => {
-    const dmId = createDM(match.user.id, match.user.name);
+  const handleStartDmFromProfile = async (match: Match) => {
+    const dmId = await createDM(match.user.id, match.user.name);
     setProfileMatch(null);
     router.push(`/dashboard/chat?group=${dmId}`);
   };

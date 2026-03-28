@@ -101,7 +101,7 @@ export default function OnboardingModal() {
     });
   };
 
-  const handleFinish = () => {
+  const handleFinish = async () => {
     const coursesWithIds = courseEntries
       .filter((e) => e.code.length > 0)
       .map((e) => ({
@@ -124,7 +124,7 @@ export default function OnboardingModal() {
       studyGoal: studyGoal || "pass",
       studyTimePreference,
     };
-    setOnboardingComplete(data);
+    await setOnboardingComplete(data);
     router.replace("/dashboard", { scroll: false });
   };
 

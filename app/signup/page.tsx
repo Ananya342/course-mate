@@ -4,6 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Input, Button } from "@/components/ui";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { createBrowserSupabaseClient } from "@/lib/supabase/client";
+import { PASSWORD_RULES_SUMMARY, validatePassword } from "@/lib/auth/passwordPolicy";
 
 type SignupStep = "email" | "verify" | "profile";
 
@@ -13,6 +16,7 @@ export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [codeInput, setCodeInput] = useState("");
   const [verificationToken, setVerificationToken] = useState("");
   const [isSendingCode, setIsSendingCode] = useState(false);
@@ -101,8 +105,13 @@ export default function SignupPage() {
       return;
     }
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+    const pw = validatePassword(password);
+    if (!pw.ok) {
+      setError(pw.errors.join(" "));
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match. Re-enter the same password twice.");
       return;
     }
 
@@ -131,6 +140,26 @@ export default function SignupPage() {
         return;
       }
 
+      if (isSupabaseConfigured()) {
+        try {
+          const supabase = createBrowserSupabaseClient();
+          const { error: signErr } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          if (signErr) {
+            setError(
+              signErr.message +
+                " Your account may have been created; try logging in."
+            );
+            return;
+          }
+        } catch {
+          setError("Could not sign you in. Check Supabase keys in .env.local.");
+          return;
+        }
+      }
+
       if (typeof window !== "undefined") {
         sessionStorage.setItem("signupName", name.trim());
         sessionStorage.setItem("signupEmail", email);
@@ -156,7 +185,9 @@ export default function SignupPage() {
             {step === "verify" && "Step 2 of 3: enter your verification code"}
             {step === "profile" && "Step 3 of 3: finish setting up your account"}
           </p>
-          <p className="text-[var(--muted)] text-xs mb-6">We will email you a one-time verification code.</p>
+          <p className="text-[var(--muted)] text-xs mb-6">
+            We will email you a one-time verification code. Each email can only register one account.
+          </p>
           {message && <p className="mb-4 text-sm text-emerald-400">{message}</p>}
           {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
 
@@ -224,6 +255,14 @@ export default function SignupPage() {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+              />
+              <p className="text-xs text-[var(--muted)] -mt-2">{PASSWORD_RULES_SUMMARY}</p>
+              <Input
+                label="Confirm password"
+                type="password"
+                placeholder="Re-enter password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
               <Button type="submit" fullWidth size="lg" disabled={isCreatingAccount}>
                 {isCreatingAccount ? "Creating account..." : "Create account"}

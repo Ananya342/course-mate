@@ -7,18 +7,25 @@ import { Card, Button, Textarea } from "@/components/ui";
 type QAPostCardProps = {
   post: QAPostType;
   currentUserId: string;
-  onAddComment: (postId: string, body: string, isInstructor?: boolean, isFollowUp?: boolean) => void;
+  onAddComment: (
+    postId: string,
+    body: string,
+    isInstructor?: boolean,
+    isFollowUp?: boolean
+  ) => void | Promise<void>;
   onUpvote?: (postId: string) => void;
+  /** Fill search with this tag (Piazza-style drill-down) */
+  onTagClick?: (tag: string) => void;
 };
 
-export default function QAPostCard({ post, currentUserId, onAddComment, onUpvote }: QAPostCardProps) {
+export default function QAPostCard({ post, currentUserId, onAddComment, onUpvote, onTagClick }: QAPostCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [comment, setComment] = useState("");
   const [isFollowUp, setIsFollowUp] = useState(false);
 
-  const submitComment = () => {
+  const submitComment = async () => {
     if (!comment.trim()) return;
-    onAddComment(post.id, comment.trim(), false, isFollowUp);
+    await Promise.resolve(onAddComment(post.id, comment.trim(), false, isFollowUp));
     setComment("");
     setIsFollowUp(false);
     setExpanded(true);
@@ -72,6 +79,23 @@ export default function QAPostCard({ post, currentUserId, onAddComment, onUpvote
             <p className="text-sm text-[var(--muted)]">
               {post.authorName} · {new Date(post.createdAt).toLocaleDateString()}
             </p>
+            {post.tags && post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {post.tags.map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onTagClick?.(t);
+                    }}
+                    className="text-xs px-2 py-0.5 rounded-md bg-[var(--accent)]/12 text-[var(--accent)] font-semibold border border-[var(--accent)]/20 hover:bg-[var(--accent)]/20 transition-colors"
+                  >
+                    #{t}
+                  </button>
+                ))}
+              </div>
+            )}
           </button>
         </div>
       </div>

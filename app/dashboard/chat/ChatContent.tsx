@@ -46,9 +46,9 @@ export default function ChatContent() {
     return MOCK_USERS.find((u) => u.id === senderId)?.name ?? CAMPUS_PEOPLE.find((u) => u.id === senderId)?.name ?? "Unknown";
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!activeConv || !input.trim()) return;
-    addMessage(
+    await addMessage(
       activeConv.id,
       input.trim(),
       user.id,
@@ -58,8 +58,8 @@ export default function ChatContent() {
     setAttachmentName(null);
   };
 
-  const handleStartDm = (otherUserId: string, otherUserName: string) => {
-    const dmId = createDM(otherUserId, otherUserName);
+  const handleStartDm = async (otherUserId: string, otherUserName: string) => {
+    const dmId = await createDM(otherUserId, otherUserName);
     setShowCampusSearch(false);
     setSearchCampus("");
     router.push(`/dashboard/chat?group=${dmId}`);

@@ -4,6 +4,8 @@ import {
   isValidEmail,
   normalizeEmail,
 } from "@/lib/server/authStore";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { validatePassword } from "@/lib/auth/passwordPolicy";
 
 export async function POST(request: Request) {
   try {
@@ -21,9 +23,10 @@ export async function POST(request: Request) {
     if (!name) {
       return NextResponse.json({ error: "Enter your name." }, { status: 400 });
     }
-    if (password.length < 8) {
+    const pwCheck = validatePassword(password);
+    if (!pwCheck.ok) {
       return NextResponse.json(
-        { error: "Password must be at least 8 characters." },
+        { error: pwCheck.errors.join(" ") },
         { status: 400 }
       );
     }
@@ -39,7 +42,46 @@ export async function POST(request: Request) {
       );
     }
 
-    // Placeholder for real user persistence; currently returns success for demo app flow.
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+
+    if (!url) {
+      return NextResponse.json({ ok: true });
+    }
+
+    if (!serviceKey) {
+      return NextResponse.json(
+        {
+          error:
+            "NEXT_PUBLIC_SUPABASE_URL is set but SUPABASE_SERVICE_ROLE_KEY is missing. Add the service role key in .env.local.",
+        },
+        { status: 503 }
+      );
+    }
+
+    const admin = createAdminSupabaseClient();
+    const { error } = await admin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: true,
+      user_metadata: { full_name: name },
+    });
+
+    if (error) {
+      const msg = error.message.toLowerCase();
+      if (msg.includes("already") || msg.includes("registered")) {
+        return NextResponse.json(
+          { error: "An account with this email already exists. Try logging in." },
+          { status: 409 }
+        );
+      }
+      console.error("Supabase createUser:", error);
+      return NextResponse.json(
+        { error: "Could not create account. Check Supabase configuration." },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Failed to sign up:", error);

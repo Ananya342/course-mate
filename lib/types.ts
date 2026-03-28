@@ -134,6 +134,8 @@ export interface QAPost {
   createdAt: string;
   comments: QAComment[];
   upvotes: number;
+  /** Normalized slugs, e.g. hackathon, project-1 */
+  tags?: string[];
   isAnonymous?: boolean;
   isResolved?: boolean;
   instructorAnswered?: boolean;
